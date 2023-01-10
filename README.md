@@ -7,7 +7,9 @@ On a board of triangular tiles, the goal is to "roll" a pyramid with 4 faces (ca
 
 # The Board
 <br>
-<img src="https://github.com/arthurbabin/tetahedronAI/blob/main/image_2023-01-04_195906531.png?raw=true" width="300" height="324"/>
+<img src="https://github.com/arthurbabin/tetahedronAI/blob/main/image_2023-01-04_195906531.png?raw=true"/>
+<br>
+<img src="https://github.com/arthurbabin/tetahedronAI/blob/main/screenshot.jpeg?raw=true"/>
 
 # The rules
 
