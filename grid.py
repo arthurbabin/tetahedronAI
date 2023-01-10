@@ -16,7 +16,7 @@ class TetraGrid:
         assert n%2==0, "[n] must be even"
         self.width = 2*n-1
         self.height = n
-        self.grid = np.zeros((self.width,self.height))
+        self.grid = np.zeros((self.height,self.width))
         startingPoint = (n-2)//2
 
         # Cut the corners for the hexagonal shape of the grid
@@ -31,7 +31,7 @@ class TetraGrid:
                 if (j<startingPoint or j>endingPoint):
                     self.grid[i,j] = -1
         indices = np.where(self.grid!=-1) #all the indices different from -1
-        self.validIndices = zip(indices[0],indices[1]) #format indices into a list of tuples int,int
+        self.validIndices = list(zip(indices[0],indices[1])) #format indices into a list of tuples int,int
 
     def selectRandomCases(self,number=4,wantedValue=0):
         """
@@ -42,12 +42,59 @@ class TetraGrid:
         :wantedValue: integer corresponding to the wanted value in the grid for the selection
         :return: list of (int,int) corresponding to the selection of cases
         """
-        #compute possible indices corresponding to the wanted value
-        possibleIndices = np.transpose(np.where(self.grid==wantedValue))
-        #random selection in the possible indices
-        idx = np.random.randint(possibleIndices.shape[0],size=number)
-        randomSelection = possibleIndices[idx:]
+        # Indices of cells with the desired value
+        indices = np.argwhere(self.grid == wantedValue)
+
+        # Random selection among the indices
+        random_rows_ID= np.random.choice(indices.shape[0], 
+                                  size=number, 
+                                  replace=False)
+        randomSelection=indices[random_rows_ID,:]
+
         return randomSelection
+
+    def selectRandomCasesBasedOnEdgeColoring(self,wantedValue=0):
+        """
+        Select randomly [number] cases from the cases wich values are
+        in [possibleValues]
+
+        :number: number of random cases to select
+        :wantedValue: integer corresponding to the wanted value in the grid for the selection
+        :return: list of (int,int) corresponding to the selection of cases
+        """
+        chromaticNumber = 4
+        # Indices of cells with the desired value
+        indices = np.argwhere(self.grid == wantedValue)
+
+        # Shuffle indices for randomness
+        np.random.shuffle(indices)
+
+        # Filter only K indices corresponding to K different colors on the coloring
+        result = []
+        seenValues = []
+        i=0
+        while len(result)!=chromaticNumber:
+            val = self.chromaticIndex(indices[i][0],indices[i][1])
+            if val not in seenValues:
+                result.append(indices[i])
+                seenValues.append(val)
+            i+=1
+        print(result,seenValues)
+
+        return result 
+
+
+    def chromaticIndex(self,i,j):
+        if not j%2:
+            if (i//2)%2 == (j//2)%2:
+                return 1
+            else: 
+                return 2
+        else:
+            if ((i-1)//2)%2 == (j//2)%2:
+                return 3
+            else:
+                return 4
 
     def changeValue(self,i,j, value):
         """
@@ -93,10 +140,10 @@ class TetraGrid:
         #Special treatment for up and down direction because it depends on the orientation of origin case
         elif direction=="up":
             #Can't go up if the origin case is a triangle facing up
-                return (i-1)>=0 and (not self.isCaseUp(i,j)) and self.grid[i-1,j]!=outOfBoardValue
+            return (i-1)>=0 and (not self.isCaseUp(i,j)) and self.grid[i-1,j]!=outOfBoardValue
         elif direction=="down":
             #Can't go down if the origin case is a triangle facing down
-            return (i+1)<self.height and self.isCaseUp(i,j) and self.grid[i-1,j]!=outOfBoardValue
+            return (i+1)<self.height and self.isCaseUp(i,j) and self.grid[i+1,j]!=outOfBoardValue
         else:
             raise ValueError("Direction not valid")
 
@@ -114,9 +161,9 @@ class TetraGrid:
         elif direction=="right":
             destPosY,destPosX = (i,j+1)
         elif direction=="up":
-            destPosY,destPosX = (i+1,j)
-        elif direction=="down":
             destPosY,destPosX = (i-1,j)
+        elif direction=="down":
+            destPosY,destPosX = (i+1,j)
         else:
             raise ValueError("Direction not valid")
         return destPosY,destPosX

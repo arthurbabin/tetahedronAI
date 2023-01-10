@@ -21,19 +21,19 @@ class Board:
         #Creation of a Grid and a ColoredPiece according to the selected mode
         if self.mode=="tetra":
             self.grid = TetraGrid(n)
-            self.playerPiece = ColoredTetahedron(defaultColor=self.colors[0])
-            self.playerPosition = (n-1,1)
+            self.playerPiece = ColoredTetahedron(defaultColor=0)
+            self.playerPosition = (1,n-1)
             assert len(colors)==5
         else:
             #TODO implement OctaGrid and ColoredOctahedron
             #for octa mode
             self.grid = TetraGrid(n) 
-            self.playerPiece = ColoredTetahedron(defaultColor=self.colors[0])
-            self.playerPosition = (n-1,1)
+            self.playerPiece = ColoredTetahedron(defaultColor=0)
+            self.playerPosition = (1,n-1)
             assert len(colors)==9
 
         #Definition of attributes for color values
-        self.numberOfColors = len(self.colors-1)
+        self.numberOfColors = len(self.colors)-1 # default color does not count
         self.outOfBoardCaseValue = -1
         self.defaultCaseValue = 0
         self.underPlayerPieceCaseValue = 0
@@ -54,14 +54,21 @@ class Board:
 
         :return: nothing
         """
-        randomSelection = self.grid.selectRandomCases(
-            number=self.numberOfColors,
-            possibleValues=[self.defaultCaseValue]
-        )
+        #  (worked but does not always give a solution)
+        #  randomSelection = self.grid.selectRandomCases(
+        #          number=self.numberOfColors,
+        #          wantedValue=self.defaultCaseValue
+        #          )
+
+        # Use Edge coloring to find positions for the cases with a solution
+        # for the game
+        randomSelection = self.grid.selectRandomCasesBasedOnEdgeColoring(
+                wantedValue=0
+                )
         assert len(self.colors)-1==len(randomSelection)
         c = 1 #skip the default color by starting at position 1
         for i,j in randomSelection:
-            self.grid.changeValue(i,j,self.colors[c])
+            self.grid.changeValue(i,j,c)
             c+=1
 
     def isValidMove(self,direction="left"):
@@ -72,7 +79,7 @@ class Board:
         :return: a boolean
         """
         i,j = self.playerPosition
-        return self.grid.isValidMove(i,j, direction,self.outOfBoardValue)
+        return self.grid.isValidMove(i,j, direction,self.outOfBoardCaseValue)
 
     def move(self,direction="left"):
         """
@@ -82,24 +89,27 @@ class Board:
         :direction: direction string (either left,right,up or down)
         :return: nothing
         """
+        print("move",direction)
         # 1. Compute destination position and color
         i,j = self.playerPosition
         destPosX,destPosY = self.grid.getDestinationPosition(
-            i,
-            j,
-            direction
-        )
-        destColor = self.grid[destPosX,destPosY]
+                i,
+                j,
+                direction
+                )
+        destColor = self.grid.grid[destPosX,destPosY]
 
         # 2. Update the player's piece according to the move
         changedColor = self.playerPiece.move(direction,destColor)
-        self.grid.changeValue(destPosY,destPosX,0.5)
+        self.grid.changeValue(destPosX,destPosY,0.5)
 
         # 3. Update the case that was under the player's piece
         self.grid.changeValue(i,j,self.underPlayerPieceCaseValue)
 
         # 4. Keep in memory the new value of the case under the player's piece
         self.underPlayerPieceCaseValue = changedColor
+
+        self.playerPosition = destPosX,destPosY
 
     def render(self):
         """
