@@ -29,42 +29,47 @@ classDiagram
         bool wantsToContinue()
     }
 
-	class AbstractGrid {
-			int width, height
-			Matrix~int~ grid
-			Matrix~bool~ isInValueList(List~int~ valueList)
-			selectRandomCasesWithSolution(int wantedValue)
-			void changeValue(int i, int j, int value)
-			bool isCaseUp(int i, int j)
-			bool isValidMove(int i, int j,string direction, int outOfBoardValue)
-            (int,int) getDestinationPosition(int i,int j, string direction)
-		}
+    class AbstractGrid {
+        int width, height
+        Matrix~int~ grid
+        Matrix~bool~ isInValueList(List~int~ valueList)
+        selectRandomCasesWithSolution(int wantedValue)
+        void changeValue(int i, int j, int value)
+        bool isCaseUp(int i, int j)
+        bool isValidMove(int i, int j,string direction, int outOfBoardValue)
+        (int,int) getDestinationPosition(int i,int j, string direction)
+    }
+
     class TetraGrid {
         int ccIndex(int i, int j)
     }
-	class Board {
-			List~pygame.Color~ colors
-			AbstractGrid grid
-			AbstractColoredPiece playerPiece
-			int,int playerPosition
-			int numberOfColors
-			int outOfBoardCaseValue
-			int defaultCaseValue
-			int underPlayerPieceCaseValue
-			void randomizeColorCases()
-            bool isValidMove(string direction)
-            void move(string direction)
-			bool checkWin()
-		}
-	class AbstractColoredPiece {
-			pygame.Color defaultColor
-			Dict~string:pygame.Color~ faces
-			void move(string direction, int colorOfDestination)
-			bool isFullyColored()
-		}
-	class ColoredTetahedron {
-	}
-	ColoredTetahedron --|> AbstractColoredPiece
+
+    class Board {
+        List~pygame.Color~ colors
+        AbstractGrid grid
+        AbstractColoredPiece playerPiece
+        int,int playerPosition
+        int numberOfColors
+        int outOfBoardCaseValue
+        int defaultCaseValue
+        int underPlayerPieceCaseValue
+        void randomizeColorCases()
+        bool isValidMove(string direction)
+        void move(string direction)
+        bool checkWin()
+    }
+
+    class AbstractColoredPiece {
+        pygame.Color defaultColor
+        Dict~string:pygame.Color~ faces
+        void move(string direction, int colorOfDestination)
+        bool isFullyColored()
+    }
+
+    class ColoredTetahedron {
+    }
+
+    ColoredTetahedron --|> AbstractColoredPiece
     TetraGrid --|> AbstractGrid
 ```
 
